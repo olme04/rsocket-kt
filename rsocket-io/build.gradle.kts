@@ -3,5 +3,5 @@ plugins {
 }
 
 library {
-    description("RSocket protocol declarations")
+    description("RSocket IO abstraction")
 }

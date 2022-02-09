@@ -1,7 +1,7 @@
 [versions]
 kotlin = "1.6.20-M1"
 
-kotlinx-atomicfu = "0.17.0"
+kotlinx-atomicfu = "0.17.1"
 kotlinx-coroutines = "1.6.0"
 
 ktor = "2.0.0-eap-317"

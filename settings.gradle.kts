@@ -77,14 +77,18 @@ modules {
     "coroutines"() //jobs, channels, flows extensions
     "internal"() //int map
 
-    "protocol" { //TODO: protocol naming
+    "protocol" { //TODO: protocol naming (spec?, etc)
         "resume"()
         "keepalive"()
 
-        //TODO: decide on lease
-        "lease"()
+        "extension" {
+            "lease"()
+            "broker"()
+            "prioritization"() //TODO: experiment
+        }
 
         "machinery"() //protocol impl go here?
+
     }
 
     "metadata"() //metadata api and default impls
@@ -113,5 +117,4 @@ modules {
     "connection"() //links configuration and transport
 
     "loadbalance"()
-    "broker"()
 }

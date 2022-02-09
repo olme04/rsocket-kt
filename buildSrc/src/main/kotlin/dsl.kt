@@ -33,6 +33,11 @@ class Library internal constructor() {
     private var native: NativeTargets? = NativeTargets.Posix
     private val uses: MutableList<DelegatingProjectDependency> = mutableListOf()
     private val dependencies: MutableList<Provider<MinimalExternalModuleDependency>> = mutableListOf()
+    private var explicitApi: ExplicitApiMode = ExplicitApiMode.Strict
+
+    fun explicitApi(value: ExplicitApiMode) {
+        explicitApi = value
+    }
 
     fun description(value: String) {}
     fun targets(
@@ -51,11 +56,15 @@ class Library internal constructor() {
     }
 
     internal fun applyTo(extension: KotlinMultiplatformExtension): Unit = extension.run {
+        explicitApi = this@Library.explicitApi
+
         jvm?.run {
             jvm()
         }
         js?.run {
-            js()
+            js {
+                nodejs()
+            }
         }
         native?.run {
             linuxX64()

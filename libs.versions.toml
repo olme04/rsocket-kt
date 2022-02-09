@@ -1,0 +1,15 @@
+[versions]
+kotlin = "1.6.20-M1"
+
+kotlinx-atomicfu = "0.17.0"
+kotlinx-coroutines = "1.6.0"
+
+ktor = "2.0.0-eap-317"
+
+[libraries]
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+
+ktor-io = { module = "io.ktor:ktor-io", version.ref = "ktor" }
+
+build-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+build-kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "kotlinx-atomicfu" }

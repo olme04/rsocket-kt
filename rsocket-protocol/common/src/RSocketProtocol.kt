@@ -1,8 +1,8 @@
 package rsocket.protocol
 
-public enum class RSocketProtocol {
-    Version1,
+public enum class RSocketProtocol { V1, V2 }
 
-    @RSocket2Api
-    Version2
-}
+public data class RSocketVersion(
+    public val major: RSocketProtocol,
+    public val minor: Int
+)

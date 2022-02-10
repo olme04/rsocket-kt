@@ -31,7 +31,7 @@ public interface RSocketConnectionOutput {
 public interface RSocketConnectionInput {
     public fun receiveFrame(frame: ConnectionFrame)
 
-    //TODO: should RequestFrame should be here???
+    //TODO: should RequestFrame be here???
     public fun acceptRequest(frame: RequestFrame, output: RSocketRequestOutput): RSocketRequestInput
 }
 

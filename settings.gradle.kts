@@ -74,10 +74,11 @@ modules {
         "microutils"()
     }
 
+    "annotations"() //???
     "coroutines"() //jobs, channels, flows extensions
     "internal"() //int map
 
-    "protocol" { //TODO: protocol naming (spec?, etc)
+    "protocol" {
         "resume"()
         "keepalive"()
 
@@ -87,12 +88,19 @@ modules {
             "prioritization"() //TODO: experiment
         }
 
+        "configuration"() //protocol configuration
+
         "machinery"() //protocol impl go here?
 
     }
 
     "metadata"() //metadata api and default impls
-    "payload"() //payload api and minimal impls
+    "payload" {  //payload api and minimal impls
+        "serialization" {
+            "kotlinx"()
+            "moshi"()
+        }
+    }
     "frame"() //frame api declarations
 
     "transport" {
@@ -111,8 +119,6 @@ modules {
         }
         "okhttp"()
     }
-
-    "configuration"() //protocol configuration
 
     "connection"() //links configuration and transport
 

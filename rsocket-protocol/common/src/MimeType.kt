@@ -1,35 +1,15 @@
-@file:Suppress("FunctionName", "MemberVisibilityCanBePrivate")
-
 package rsocket.protocol
 
-public sealed interface MimeType {
+public sealed interface MimeType : CompactType {
+    public companion object :
+        CompactTypeFactory<WithId, WithName, WellKnown>(::WithIdImpl, ::WithNameImpl, enumValues())
 
-    public companion object {
-        public fun WithId(identifier: Byte): WithId = WellKnown(identifier) ?: Reserved(identifier)
-        public fun WithId(identifier: Int): WithId = WellKnown(identifier) ?: Reserved(identifier)
-        public fun WithName(text: String): WithName = WellKnown(text) ?: Custom(text)
-
-        public fun WellKnown(identifier: Byte): WellKnown? = WellKnown.byId(identifier)
-        public fun WellKnown(identifier: Int): WellKnown? = WellKnown.byId(identifier.toByte())
-        public fun WellKnown(text: String): WellKnown? = WellKnown.byText(text)
-
-        public fun Reserved(identifier: Byte): WithId = WithIdImpl(identifier)
-        public fun Reserved(identifier: Int): WithId = WithIdImpl(identifier.toByte())
-        public fun Custom(text: String): WithName = WithNameImpl(text)
-    }
-
-    public sealed interface WithId : MimeType {
-        public val identifier: Byte
-    }
-
-    public sealed interface WithName : MimeType {
-        public val text: String
-    }
-
+    public sealed interface WithId : MimeType, CompactType.WithId
+    public sealed interface WithName : MimeType, CompactType.WithName
     public enum class WellKnown(
         public override val text: String,
         public override val identifier: Byte,
-    ) : WithName, WithId {
+    ) : MimeType, CompactType.WellKnown, WithId, WithName {
         ApplicationAvro("application/avro", 0x00),
         ApplicationCbor("application/cbor", 0x01),
         ApplicationGraphql("application/graphql", 0x02),
@@ -81,76 +61,14 @@ public sealed interface MimeType {
         MessageRSocketRouting("message/x.rsocket.routing.v0", 0x7E),
         MessageRSocketCompositeMetadata("message/x.rsocket.composite-metadata.v0", 0x7F);
 
-        override fun toString(): String = text
-
-        internal companion object {
-            private val byIdentifier: Array<WellKnown?> = arrayOfNulls(128)
-            private val byName: MutableMap<String, WellKnown> = HashMap(128)
-
-            init {
-                values().forEach {
-                    byIdentifier[it.identifier.toInt()] = it
-                    byName[it.text] = it
-                }
-            }
-
-            fun byId(identifier: Byte): WellKnown? = byIdentifier[identifier.toInt()]
-            fun byText(text: String): WellKnown? = byName[text]
-        }
-    }
-}
-
-private class WithNameImpl(override val text: String) : MimeType.WithName {
-    init {
-        requireAscii(text)
-        requireLength128(text.length.toByte())
+        override fun toString(): String = toString("MimeType")
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as WithNameImpl
-
-        if (text != other.text) return false
-
-        return true
+    private class WithNameImpl(text: String) : WithName, AbstractCompactTypeWithName(text) {
+        override fun toString(): String = toString("MimeType")
     }
 
-    override fun hashCode(): Int {
-        return text.hashCode()
+    private class WithIdImpl(identifier: Byte) : WithId, AbstractCompactTypeWithId(identifier) {
+        override fun toString(): String = toString("MimeType")
     }
-
-    override fun toString(): String = text
-}
-
-private class WithIdImpl(override val identifier: Byte) : MimeType.WithId {
-    init {
-        requireLength128(identifier)
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as WithIdImpl
-
-        if (identifier != other.identifier) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return identifier.hashCode()
-    }
-
-    override fun toString(): String = "ID: $identifier"
-}
-
-private fun requireAscii(value: String) {
-    require(value.all { it.code <= 0x7f }) { "String should be an ASCII encodded string" }
-}
-
-private fun requireLength128(value: Byte) {
-    require(value in 1..128) { "Mime-type text length must be in range 1..128 but was '${value}'" }
 }

@@ -1,6 +1,6 @@
 package rsocket.protocol
 
-//TODO declare throwable
+public class RSocketException(public val code: ErrorCode, override val message: String) : RuntimeException(message)
 
 //TODO move value to errorCode?
 public sealed interface ErrorCode {

@@ -25,7 +25,8 @@ public sealed interface SetupFrame : ConnectionFrame {
     public interface V2 : SetupFrame, ConnectionFrame.V2 {
         override val type: ConnectionFrameType.Setup get() = ConnectionFrameType.Setup
         override val flags: SetupFlags.V2
-        //TODO: add extensions payload here
+
+        public val extensions: ExtensionsContainer
     }
 }
 
@@ -43,8 +44,18 @@ public sealed interface SetupFlags : Flags, Flags.HasMetadata {
 
 public sealed interface SetupOkFrame : ConnectionFrame.V2 {
     override val type: ConnectionFrameType.SetupOk get() = ConnectionFrameType.SetupOk
+
+    public val extensions: ExtensionsContainer
 }
 
 public sealed interface ExtensionsFrame : ConnectionFrame.V2 {
     override val type: ConnectionFrameType.Extension get() = ConnectionFrameType.Extension
+    //TODO: add can be ignored
+
+    public val extensionType: ProtocolExtensionType //type of extension
+    public val data: Buffer //data of extension, depends on extension
+}
+
+public sealed interface ExtensionsContainer {
+    public val types: List<ProtocolExtensionType>
 }

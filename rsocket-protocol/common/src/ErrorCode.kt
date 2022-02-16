@@ -17,7 +17,7 @@ public sealed interface ConnectionErrorCode : ErrorCode {
     public object ConnectionError : ConnectionErrorCode
     public object ConnectionClose : ConnectionErrorCode
 
-    public interface Custom : ErrorCode.Custom, ConnectionErrorCode
+    public interface Custom : ConnectionErrorCode, ErrorCode.Custom
 }
 
 public sealed interface StreamErrorCode : ErrorCode {
@@ -26,5 +26,5 @@ public sealed interface StreamErrorCode : ErrorCode {
     public object Canceled : StreamErrorCode
     public object Invalid : StreamErrorCode
 
-    public interface Custom : ErrorCode.Custom, StreamErrorCode
+    public interface Custom : StreamErrorCode, ErrorCode.Custom
 }

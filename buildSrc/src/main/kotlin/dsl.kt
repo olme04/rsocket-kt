@@ -60,6 +60,11 @@ class Library internal constructor() {
 
         jvm?.run {
             jvm()
+
+//            jvmToolchain {
+//                this as JavaToolchainSpec
+//                languageVersion.set(JavaLanguageVersion.of(8))
+//            }
         }
         js?.run {
             js {

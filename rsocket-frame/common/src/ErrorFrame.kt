@@ -1,13 +1,14 @@
 package rsocket.frame
 
+import rsocket.io.*
 import rsocket.protocol.*
 
-public sealed interface ErrorFrame : Frame, Frame.V1, Frame.V2 {
+public sealed interface ErrorFrame : Frame {
     override val type: FrameType.Error
     override val flags: Flags.Empty get() = Flags.Empty
 
     public val code: ErrorCode
-    public val message: String //TODO: make it buffer???
+    public val data: Buffer //TODO: make it buffer??? or payload?
 }
 
 public interface ConnectionErrorFrame : ErrorFrame, ConnectionFrame {

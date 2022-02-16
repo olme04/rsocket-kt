@@ -24,103 +24,64 @@ dependencyResolutionManagement {
 
 rootProject.name = "rsocket-kt"
 
-fun module(name: String, vararg submodules: String) {
-    include(name)
-    project(":$name").projectDir = file("rsocket-$name")
-
-    submodules.forEach { submodule ->
-        include("$name:$submodule")
-        project(":$name:$submodule").projectDir = file("rsocket-$name/rsocket-$submodule")
+fun modules(folder: File, vararg names: String) {
+    names.forEach { name ->
+        include(name)
+        project(":$name").projectDir = folder.resolve("rsocket-$name")
     }
 }
 
-class Module(val parent: Module?, val names: List<String>) {
-
-    val nested = mutableListOf<Module>()
-    operator fun String.invoke(block: Module.() -> Unit = {}) {
-        nested += Module(this@Module, names + this).apply(block)
-    }
-
-    val name: String = names.joinToString("-")
-    fun projectPath(): String = (parent?.projectPath()?.let { "$it:" } ?: "") + name
-    fun projectDir(): String = (parent?.projectDir()?.let { "$it/rsocket-" } ?: "") + name
+fun modules(vararg names: String) {
+    modules(rootDir, *names)
 }
 
-fun modules(block: Module.() -> Unit) {
-    fun List<Module>.create(): Unit = forEach { module ->
-//        println(
-//            module.name + " | " +
-//                    module.projectPath().drop(1) + " | " +
-//                    module.projectPath() + " | " +
-//                    module.projectDir().drop(1)
-//        )
-        include(module.projectPath().drop(1))
-        project(module.projectPath()).projectDir = file(module.projectDir().drop(1))
-        module.nested.create()
-    }
-
-    Module(null, emptyList()).apply(block).nested.create()
+fun group(folder: String, groupName: String, vararg names: String) {
+    modules(file(folder), groupName, *names.map { "$groupName-$it" }.toTypedArray())
 }
 
-modules {
-    "io" {
-        "ktor"()
-        "okio"()
-        "netty"()
-    }
-    "logging" {
-        "kermit"()
-        "slf4j"()
-        "microutils"()
-    }
+group("integrations/io", "io", "ktor", "okio", "netty")
+group("integrations/logging", "logging", "kermit", "slf4j", "microutils")
+group("integrations/serialization", "serialization", "kotlinx", "moshi")
 
-    "annotations"() //???
-    "coroutines"() //jobs, channels, flows extensions
-    "internal"() //int map
+group(
+    "integrations/transport",
+    "transport",
+    "memory",
+    "okhttp",
+    "ktor",
+    "ktor-tcp",
+    "ktor-websocket",
+    "ktor-websocket-client",
+    "ktor-websocket-server",
+    "netty",
+    "netty-tcp",
+    "netty-quic",
+    "netty-websocket",
+)
 
-    "protocol" {
-        "resume"()
-        "keepalive"()
+group(
+    "extensions",
+    "extension",
+    "keepalive",
+    "resume",
+    "lease",
+    "broker",
+)
 
-        "extension" {
-            "lease"()
-            "broker"()
-            "prioritization"() //TODO: experiment
-        }
+modules(
+    "protocol",
+    "metadata",
+    "payload",
+    "frame",
+)
 
-        "configuration"() //protocol configuration
-
-        "machinery"() //protocol impl go here?
-
-    }
-
-    "metadata"() //metadata api and default impls
-    "payload" {  //payload api and minimal impls
-        "serialization" {
-            "kotlinx"()
-            "moshi"()
-        }
-    }
-    "frame"() //frame api declarations
-
-    "transport" {
-        "memory"()//TODO: `memory` naming
-        "ktor" {
-            "tcp"()
-            "websocket" {
-                "client"()
-                "server"()
-            }
-        }
-        "netty" {
-            "tcp"()
-            "quic"()
-            "websocket"()
-        }
-        "okhttp"()
-    }
-
-    "connection"() //links configuration and transport
-
-    "loadbalance"()
-}
+//
+//include(
+//    "rsocket-coroutines",
+//    "rsocket-internal",
+//    "rsocket-annotations", //TODO: is it needed?
+//    "rsocket-configuration",
+//    "rsocket-machinery",
+//    "rsocket-connection",
+//    "rsocket-loadbalance",
+//)

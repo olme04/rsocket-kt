@@ -2,15 +2,15 @@ package rsocket.protocol
 
 //TODO naming
 public interface CompactType {
-    public interface WithId {
+    public interface WithId : CompactType {
         public val identifier: Byte
     }
 
-    public interface WithName {
+    public interface WithName : CompactType {
         public val text: String
     }
 
-    public interface WellKnown : WithId, WithName
+    public interface WellKnown : CompactType, WithId, WithName
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -29,6 +29,7 @@ public abstract class CompactTypeFactory<WithId : CompactType.WithId, WithName :
         }
     }
 
+    //TODO is it needed?
     public fun WellKnown(text: String): WellKnown? = wellKnownByName[text]
     public fun WellKnown(identifier: Byte): WellKnown? = wellKnownByIdentifier[identifier.toInt()]
     public fun WellKnown(identifier: Int): WellKnown? = wellKnownByIdentifier[identifier]

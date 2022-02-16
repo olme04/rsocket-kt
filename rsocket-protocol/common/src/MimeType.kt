@@ -64,11 +64,11 @@ public sealed interface MimeType : CompactType {
         override fun toString(): String = toString("MimeType")
     }
 
-    private class WithNameImpl(text: String) : WithName, AbstractCompactTypeWithName(text) {
+    private class WithIdImpl(identifier: Byte) : WithId, AbstractCompactTypeWithId(identifier) {
         override fun toString(): String = toString("MimeType")
     }
 
-    private class WithIdImpl(identifier: Byte) : WithId, AbstractCompactTypeWithId(identifier) {
+    private class WithNameImpl(text: String) : WithName, AbstractCompactTypeWithName(text) {
         override fun toString(): String = toString("MimeType")
     }
 }

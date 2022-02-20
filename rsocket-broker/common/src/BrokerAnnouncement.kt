@@ -3,6 +3,14 @@ package rsocket.broker
 import rsocket.io.*
 import rsocket.protocol.extension.*
 
+/*
+    after setup, send route added to other brokers
+    ability to send broker info
+    auto send route added/removed on new route setup
+    on any announcement update routing table
+    on receiving address, forward all frames to routable destination based on routing type and tags
+ */
+
 //sent between brokers
 public sealed interface BrokerAnnouncement : ConnectionExtensionPayload {
     public val brokerId: BrokerId

@@ -11,11 +11,11 @@ public sealed interface ExtensionType : CompactType {
         public override val text: String,
         public override val identifier: Byte,
     ) : ExtensionType, CompactType.WellKnown, WithId, WithName {
-        Keepalive("keepalive", 0x00),
-        Resume("resume", 0x01),
-        Lease("lease", 0x02),
-        Broker("broker", 0x03),
-        Prioritization("prioritization", 0x04);
+        Keepalive("keepalive", 0x01),
+        Resume("resume", 0x02),
+        Lease("lease", 0x03),
+        Broker("broker", 0x04),
+        Prioritization("prioritization", 0x05);
 
         override fun toString(): String = toString("ExtensionType")
     }

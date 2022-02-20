@@ -4,6 +4,12 @@ import rsocket.io.*
 import rsocket.protocol.extension.*
 import kotlin.time.*
 
+/*
+    after setup, send KAD in interval
+    respond if received KAD with respond = true
+    close connection after not receiving KAD in maxLifetime
+ */
+
 public class KeepAliveSetup(
     public val keepAliveInterval: Duration,
     public val keepAliveMaxLifetime: Duration,

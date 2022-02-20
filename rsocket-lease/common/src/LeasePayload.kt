@@ -2,7 +2,7 @@ package rsocket.lease
 
 import rsocket.io.*
 
-public interface LeasePayload {
+public interface LeasePayload { //todo right interface
     public val strategy: LeaseStrategy
     public val buffer: Lazy<Buffer>
 }

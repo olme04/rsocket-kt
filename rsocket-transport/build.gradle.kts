@@ -3,7 +3,7 @@ plugins {
 }
 
 library {
-    description("RSocket protocol declarations")
+    description("RSocket transport API")
     uses(
         projects.rsocketIo
     )

@@ -5,7 +5,6 @@ plugins {
 library {
     description("RSocket metadata API")
     uses(
-        projects.io,
-        projects.protocol //for mime type
+        projects.rsocketProtocol
     )
 }

@@ -25,7 +25,7 @@ Resume__: Replaces SETUP for Resuming Operation (optional) |
 | [__RESUME_OK__](#frame-resume-ok)                 | 0x0E | __Resume
 OK__ : Sent in response to a RESUME if resuming operation possible (optional) |
 | [__EXT__](#frame-ext)                             | 0x3F | __Extension
-Header__: Used To Extend more frame types as well as extensions. |
+Header__: Used To Extend more frame types as well as extension. |
 
 <a name="frame-setup"></a>
 
@@ -42,7 +42,7 @@ values or MAY decide to use specific non-MIME type values to indicate format, la
 metadata. The protocol implementation MUST NOT interpret the MIME type itself. This is an application concern only.
 
 flags:
-X - has extensions M - has metadata MO - override metadata mime DO - override data mime A - for setup - require ack F -
+X - has extension M - has metadata MO - override metadata mime DO - override data mime A - for setup - require ack F -
 follows, for fragmentation C - complete N - next
 
 Payload = Data + optional metadata + optional Data mimetype override + optional Metadata mimetype override | Data +

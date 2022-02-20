@@ -8,12 +8,12 @@ public interface Payload {
 
     public interface Data {
         public val mimeType: MimeType?
-        public val buffer: Buffer
+        public val buffer: Lazy<Buffer>
     }
 
     public interface Metadata {
         public val mimeType: MimeType?
-        public val buffer: Buffer
+        public val buffer: Lazy<Buffer>
     }
 }
 

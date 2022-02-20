@@ -24,61 +24,44 @@ dependencyResolutionManagement {
 
 rootProject.name = "rsocket-kt"
 
-fun modules(folder: File, vararg names: String) {
-    names.forEach { name ->
-        include(name)
-        project(":$name").projectDir = folder.resolve("rsocket-$name")
-    }
+fun module(name: String) {
+    include(name)
+    project(":$name").projectDir = file(name.replace(":", "/"))
 }
 
-fun modules(vararg names: String) {
-    modules(rootDir, *names)
+fun modules(prefix: String, vararg names: String) {
+    names.forEach { module("$prefix-$it") }
 }
 
-fun group(folder: String, groupName: String, vararg names: String) {
-    modules(file(folder), groupName, *names.map { "$groupName-$it" }.toTypedArray())
-}
+module("rsocket-io")
+modules("rsocket-io:rsocket-io", "ktor", "okio", "netty")
 
-group("integrations/io", "io", "ktor", "okio", "netty")
-group("integrations/logging", "logging", "kermit", "slf4j", "microutils")
-group("integrations/serialization", "serialization", "kotlinx", "moshi")
+module("rsocket-logging")
+modules("rsocket-logging:rsocket-logging", "kermit", "slf4j", "microutils")
 
-group(
-    "integrations/transport",
-    "transport",
-    "memory",
-    "okhttp",
+module("rsocket-serialization")
+modules("rsocket-serialization:rsocket-serialization", "kotlinx", "moshi", "microutils")
 
-    "ktor",
-    "ktor-tcp",
-    "ktor-websocket",
-    "ktor-websocket-client",
-    "ktor-websocket-server",
+module("rsocket-transport")
+modules("rsocket-transport:rsocket-transport", "memory", "okhttp", "ktor", "netty")
+modules("rsocket-transport:rsocket-transport-ktor:rsocket-transport-ktor", "tcp", "websocket", "websocket-client", "websocket-server")
+modules("rsocket-transport:rsocket-transport-netty:rsocket-transport-netty", "tcp", "quic", "websocket")
 
-    "netty",
-    "netty-tcp",
-    "netty-quic",
-    "netty-websocket",
-)
+module("rsocket-protocol")
+module("rsocket-metadata")
 
-//group(
-//    "extensions",
-//    "extension",
-//    "keepalive",
-//    "resume",
-//    "lease",
-//    "broker",
-//    "prioritization",
-//)
+//extensions
+module("rsocket-keepalive")
+module("rsocket-resume")
+module("rsocket-lease")
+module("rsocket-broker")
 
-modules("protocol")
+//module("rsocket-loadbalance")
 
 //
 //modules(
 //    "coroutines",
 //    "internal",
-//    "rsocket-annotations", //TODO: is it needed?
 //    "rsocket-configuration",
 //    "rsocket-connection",
-//    "rsocket-loadbalance",
 //)

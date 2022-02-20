@@ -17,7 +17,7 @@ public interface SetupFlags : Flags, Flags.HasMetadata, Flags.HasExtensions {
 }
 
 public sealed interface CustomFrame : ConnectionFrame {
-    override val type: ConnectionFrameType.Custom get() = ConnectionFrameType.Custom
+    override val type: ConnectionFrameType.Extension get() = ConnectionFrameType.Extension
 
     public val extensions: List<Extension>
 }

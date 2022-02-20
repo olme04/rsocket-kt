@@ -1,7 +1,6 @@
 package rsocket.extension.resume
 
 import rsocket.io.*
-import rsocket.metadata.*
 import rsocket.protocol.*
 
 public fun interface ResumeResolver : Closeable {

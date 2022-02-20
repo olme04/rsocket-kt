@@ -8,6 +8,6 @@ library {
         projects.protocol,
         projects.io,
         projects.metadata,
-        projects.frame,
+//        projects.frame,
     )
 }

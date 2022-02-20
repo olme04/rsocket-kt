@@ -22,3 +22,24 @@ public interface Buffer : Closeable {
     public fun getFloatArray(index: Int, destination: FloatArray, offset: Int = 0, size: Int = destination.size)
     public fun getDoubleArray(index: Int, destination: DoubleArray, offset: Int = 0, size: Int = destination.size)
 }
+
+public sealed interface BufferFactory : Closeable {
+    public fun createBuffer(size: Int): Buffer
+}
+
+public abstract class AbstractBufferFactory<MB : MutableBuffer, B : Buffer> : BufferFactory {
+    public abstract override fun createBuffer(size: Int): MB
+
+    protected abstract fun map(mutable: MB): B
+
+    public fun buildBuffer(size: Int, block: MB.() -> Unit): B {
+        val buffer = createBuffer(size)
+        try {
+            block(buffer)
+            return map(buffer)
+        } catch (cause: Throwable) {
+            buffer.close()
+            throw cause
+        }
+    }
+}

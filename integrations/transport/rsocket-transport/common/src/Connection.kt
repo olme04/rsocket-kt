@@ -3,45 +3,32 @@ package rsocket.transport
 import kotlinx.coroutines.*
 import rsocket.io.*
 
-public sealed interface Connection : CoroutineScope
-
-//TCP like
-public interface SequentialConnection : Connection {
-    public suspend fun sendFrame(frame: Buffer)
-
-    public fun start(handler: FrameHandler)
-}
-
-//QUIC like
-public interface StreamingConnection : Connection {
-    // TODO: what to do with prioritization of zero stream frame?
-    //  for sequential transport, it will be automatically prioritized all time
-    public suspend fun createStream(handler: FrameHandler, prioritized: Boolean): StreamOutbound
-
+public interface Connection : CoroutineScope, StreamFactory {
     public fun start(acceptor: StreamAcceptor)
 }
 
-//RSocket like
-public interface MultiplexedConnection : Connection {
-    public suspend fun sendConnectionFrame(frame: Buffer)
-    public suspend fun createRequestStream(handler: FrameHandler): StreamOutbound
-
-    public fun start(handler: MultiplexedHandler)
+//impl in transport impl
+public interface StreamFactory {
+    public suspend fun createStream(frame: Buffer, handler: FrameHandler): StreamOutbound
 }
 
-public interface StreamOutbound : Closeable {
+//impl inside rsocket
+public interface StreamAcceptor {
+    public fun onStream(frame: Buffer, outbound: StreamOutbound): FrameHandler
+}
+
+public interface StreamOutbound : FrameOutbound, Closeable {
+    //TODO how it do better?
+    // positive, 0 - no priority, 1 - max priority
+    public var priority: Int
+}
+
+//impl in transport impl
+public interface FrameOutbound {
     public suspend fun sendFrame(frame: Buffer)
 }
 
+//impl inside rsocket
 public interface FrameHandler {
-    public fun handleFrame(frame: Buffer)
-}
-
-public interface StreamAcceptor {
-    public fun acceptStream(outbound: StreamOutbound): FrameHandler
-}
-
-public interface MultiplexedHandler {
-    public fun handleConnectionFrame(frame: Buffer)
-    public fun acceptRequestStream(outbound: StreamOutbound): FrameHandler
+    public fun onFrame(frame: Buffer)
 }

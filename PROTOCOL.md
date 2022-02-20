@@ -31,17 +31,22 @@ Header__: Used To Extend more frame types as well as extensions. |
 
 ### SETUP Frame (0x01)
 
-Setup frames MUST always use Stream ID 0 as they pertain to the connection.
+Setup frame MUST always use Stream ID 0 as they pertain to the connection.
 
 The SETUP frame is sent by the client to inform the server of the parameters under which it desires to operate. The
 usage and message sequence used is shown in [Connection Establishment](#connection-establishment).
 
 One of the important parameters for a connection is the format, layout, and any schema of the data and metadata for
-frames. This is, for lack of a better term, referred to here as "MIME Type". An implementation MAY use typical MIME type
+frame. This is, for lack of a better term, referred to here as "MIME Type". An implementation MAY use typical MIME type
 values or MAY decide to use specific non-MIME type values to indicate format, layout, and any schema for data and
 metadata. The protocol implementation MUST NOT interpret the MIME type itself. This is an application concern only.
 
-Payload = Data + optional metadata + optional Data mimetype override + optional Metadata mimetype override
+flags:
+X - has extensions M - has metadata MO - override metadata mime DO - override data mime A - for setup - require ack F -
+follows, for fragmentation C - complete N - next
+
+Payload = Data + optional metadata + optional Data mimetype override + optional Metadata mimetype override | Data +
+optional Metadata + 3 flags (has override data, has metadata, has override metadata)
 
 The encoding format for Data and Metadata are included separately in the SETUP.
 
@@ -56,7 +61,6 @@ extension flags on setup:
 on ext:
 
 * F - if has one more extension after it
-* I - if can be ignored - is it needed?
 * _
 * _
 * 4 extension dependent
@@ -64,7 +68,6 @@ on ext:
 on stream:
 
 * F - if has one more extension after it
-* I - if can be ignored - is it needed?
 * _
 * _
 * 4 extension dependent
@@ -96,24 +99,31 @@ setup: route join ext: broker info | route add | route join stream: address
 
 Frame Contents
 
-### PAYLOAD Frame (0x0A)
+       with flags | with length
 
-Frame Contents
+0 ext: 0 bytes
 
-```
+1 ext: 1 (MT) + 1 (F) | 1 (L) + 1 (MT)
+2 ext: 2 (MT) + 2 (F) | 1 (L) + 2 (MT)
+3 ext: 3 (MT) + 3 (F) | 1 (L) + 3 (MT)
+
+``` //3 flags = M(has metadata), DMO(data mime type override), MMO(metadata mime type override)
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                           Stream ID                           |
-    +-----------+-+-+-+-+-+---------+-------------------------------+
-    |Frame Type |0|M|F|C|N|D|M|  Flags  |
-    +---------------+-----------------------------------------------+
-    |M| MIME ID/Len |   Data Encoding MIME Type                    ...
-    +---------------+-----------------------------------------------+
-    |M| MIME ID/Len |   Metadata Encoding MIME Type                ...
+    |M| MIME ID/Len |   Metadata Encoding MIME Type                ... //present if flag exists
     +-------------------------------+-------------------------------+
-                         Metadata & Data
+    |              Metadata Length                  |                  //Metadata length present if flag exists
+    +---------------------------------------------------------------+
+    |                         Metadata                             ...
+    +---------------+-----------------------------------------------+
+    |M| MIME ID/Len |   Data Encoding MIME Type                    ... //present if flag exists
+    +---------------------------------------------------------------+
+    |                              Data                            ...
+    +---------------------------------------------------------------+
 ```
+
+//default flags: |X|M|MMO|DMO|
 
 //setup
 
@@ -123,15 +133,32 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                         Stream ID = 0                         |
     +-----------+-+-+---------------+-------------------------------+
-    |Frame Type |X|M|A|    Flags    |
-    +---------------+-----------------------------------------------+
-    |M| MIME ID/Len |   Data Encoding MIME Type                    ...
-    +---------------+-----------------------------------------------+
-    |M| MIME ID/Len |   Metadata Encoding MIME Type                ...
+    |Frame Type |X|M|MM|DM|A|    Flags    |
     +---------------+-------------------------------+---------------+
     |         Major Version         |        Minor Version          |
-    +---------------+---------------+-------------------------------+
-                          Metadata & Setup Payload
+    +---------------+-----------------------------------------------+
+    |         Token Length          | Session Token  ...
+    +---------------+-----------------------------------------------+
+    |M| MIME ID/Len |   Default Data Encoding MIME Type         ...
+    +---------------+-----------------------------------------------+
+    |M| MIME ID/Len |   Default Metadata Encoding MIME Type     ...
+    +-------------------------------+-------------------------------+
+    | Number of Ext |
+    +-------------------------------+---------------+---------------+
+                          Setup Payload (Metadata & Data)
+                          
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                         Stream ID = 0                         |
+    +-----------+-+-+---------------+-------------------------------+
+    |Frame Type |X|M|MM|DM|    Flags    |
+    +---------------+-------------------------------+---------------+
+    |         Token Length          | Session Token  ...
+    +-------------------------------+-------------------------------+
+    | Number of Ext |
+    +-------------------------------+---------------+---------------+
+                          Restore Payload (Metadata & Data)
                           
                           
      EXtension setup format = (8 + 8) = 2 bytes (frame = 4 + 2 = 6) min from 6 to 8
@@ -140,7 +167,7 @@ Frame Contents
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |M| Ext ID/Len  |   Extension ID text                          ...
     +---------------+---------------+---------------+---------------+
-    |F|I|A|_| Flags |        Extension Payload Length               | present if can I=true
+    |                 Extension Payload Length                      |
     +-------------------------------+-------------------------------+
     |0|                 Time Between KEEPALIVE Frames               | here goes extension payload
     +---------------------------------------------------------------+
@@ -182,15 +209,15 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x01
 * __Flags__: (10 bits)
-  * (__M__)etadata: Metadata present
-  * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
-  * (__L__)ease: Will honor LEASE (or not).
+    * (__M__)etadata: Metadata present
+    * (__R__)esume Enable: Client requests resume capability if possible. Resume Identification Token present.
+    * (__L__)ease: Will honor LEASE (or not).
 * __Major Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Major version number of the protocol.
 * __Minor Version__: (16 bits = max value 65,535) Unsigned 16-bit integer of Minor version number of the protocol.
 * __Time Between KEEPALIVE Frames__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in
-  milliseconds) between KEEPALIVE frames that the client will send. Value MUST be > 0.
-  * For server-to-server connections, a reasonable time interval between client KEEPALIVE frames is 500ms.
-  * For mobile-to-server connections, the time interval between client KEEPALIVE frames is often > 30,000ms.
+  milliseconds) between KEEPALIVE frame that the client will send. Value MUST be > 0.
+    * For server-to-server connections, a reasonable time interval between client KEEPALIVE frame is 500ms.
+    * For mobile-to-server connections, the time interval between client KEEPALIVE frame is often > 30,000ms.
 * __Max Lifetime__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds) that
   a client will allow a server to not respond to a KEEPALIVE before it is assumed to be dead. Value MUST be > 0.
 * __Resume Identification Token Length__: (16 bits = max value 65,535) Unsigned 16-bit integer of Resume Identification
@@ -214,8 +241,8 @@ operation, MUST reject the SETUP with an ERROR[REJECTED_SETUP].
 
 ### ERROR Frame (0x0B)
 
-Error frames are used for errors on individual requests/streams as well as connection errors and in response to SETUP
-frames.
+Error frame are used for errors on individual requests/streams as well as connection errors and in response to SETUP
+frame.
 
 Frame Contents
 
@@ -234,7 +261,7 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x0B
 * __Error Code__: (32 bits = max value 2^31-1 = 2,147,483,647) Type of Error.
-  * See list of valid Error Codes below.
+    * See list of valid Error Codes below.
 * __Error Data__: includes Payload describing error information. Error Data SHOULD be a UTF-8 encoded string. The string
   MUST NOT be null terminated.
 
@@ -285,13 +312,13 @@ For example:
 
 ### LEASE Frame (0x02)
 
-Lease frames MAY be sent by the client-side or server-side Responders and inform the Requester that it may send Requests
+Lease frame MAY be sent by the client-side or server-side Responders and inform the Requester that it may send Requests
 for a period of time and how many it may send during that duration. See [Lease Semantics](#lease-semantics) for more
 information.
 
 The last received LEASE frame overrides all previous LEASE frame values.
 
-Lease frames MUST always use Stream ID 0 as they pertain to the Connection.
+Lease frame MUST always use Stream ID 0 as they pertain to the Connection.
 
 Frame Contents
 
@@ -312,7 +339,7 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x02
 * __Flags__: (10 bits)
-  * (__M__)etadata: Metadata present
+    * (__M__)etadata: Metadata present
 * __Time-To-Live (TTL)__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Time (in milliseconds)
   for validity of LEASE from time of reception. Value MUST be > 0.
 * __Number of Requests__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Number of Requests
@@ -330,11 +357,11 @@ set true.
 
 ### KEEPALIVE Frame (0x03)
 
-KEEPALIVE frames MUST always use Stream ID 0 as they pertain to the Connection.
+KEEPALIVE frame MUST always use Stream ID 0 as they pertain to the Connection.
 
-KEEPALIVE frames MUST be initiated by the client and sent periodically with the (__R__)espond flag set.
+KEEPALIVE frame MUST be initiated by the client and sent periodically with the (__R__)espond flag set.
 
-KEEPALIVE frames MAY be initiated by the server and sent upon application request with the (__R__)espond flag set.
+KEEPALIVE frame MAY be initiated by the server and sent upon application request with the (__R__)espond flag set.
 
 Reception of a KEEPALIVE frame with the (__R__)espond flag set MUST cause a client or server to send back a KEEPALIVE
 with the (__R__)espond flag __NOT__ set. The data in the received KEEPALIVE MUST be echoed back in the generated
@@ -363,7 +390,7 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x03
 * __Flags__: (10 bits)
-  * (__R__)espond with KEEPALIVE or not
+    * (__R__)espond with KEEPALIVE or not
 * __Last Received Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of Resume Last Received Position. Value
   MUST be > 0. (optional. Set to all 0s when not supported.)
 * __Data__: Data attached to a KEEPALIVE.
@@ -387,8 +414,8 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x04
 * __Flags__: (10 bits)
-  * (__M__)etadata: Metadata present
-  * (__F__)ollows: More fragments follow this fragment.
+    * (__M__)etadata: Metadata present
+    * (__F__)ollows: More fragments follow this fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 <a name="frame-fnf"></a>
@@ -410,8 +437,8 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x05
 * __Flags__: (10 bits)
-  * (__M__)etadata: Metadata present
-  * (__F__)ollows: More fragments follow this fragment.
+    * (__M__)etadata: Metadata present
+    * (__F__)ollows: More fragments follow this fragment.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 <a name="frame-request-stream"></a>
@@ -435,8 +462,8 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x06
 * __Flags__: (10 bits)
-  * (__M__)etadata: Metadata present
-  * (__F__)ollows: More fragments follow this fragment.
+    * (__M__)etadata: Metadata present
+    * (__F__)ollows: More fragments follow this fragment.
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial
   number of items to request. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
@@ -465,18 +492,18 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x07
 * __Flags__: (10 bits)
-  * (__M__)etadata: Metadata present
-  * (__F__)ollows: More fragments follow this fragment.
-  * (__C__)omplete: bit to indicate stream completion.
-    * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
+    * (__M__)etadata: Metadata present
+    * (__F__)ollows: More fragments follow this fragment.
+    * (__C__)omplete: bit to indicate stream completion.
+        * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
 * __Initial Request N__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer representing the initial
   request N value for channel. Value MUST be > 0.
 * __Request Data__: identification of the service being requested along with parameters for the request.
 
 A requester MUST send only __one__ REQUEST_CHANNEL frame. Subsequent messages from requester to responder MUST be sent
-as PAYLOAD frames.
+as PAYLOAD frame.
 
-A requester MUST __not__ send PAYLOAD frames after the REQUEST_CHANNEL frame until the responder sends a REQUEST_N frame
+A requester MUST __not__ send PAYLOAD frame after the REQUEST_CHANNEL frame until the responder sends a REQUEST_N frame
 granting credits for number of PAYLOADs able to be sent.
 
 See Flow Control: Reactive Streams Semantics for more information on RequestN behavior.
@@ -542,22 +569,22 @@ Frame Contents
 
 * __Frame Type__: (6 bits) 0x0A
 * __Flags__: (10 bits)
-  * (__M__)etadata: Metadata Present.
-  * (__F__)ollows: More fragments follow this fragment.
-  * (__C__)omplete: bit to indicate stream completion.
-    * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
-  * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
-    * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
+    * (__M__)etadata: Metadata Present.
+    * (__F__)ollows: More fragments follow this fragment.
+    * (__C__)omplete: bit to indicate stream completion.
+        * If set, `onComplete()` or equivalent will be invoked on Subscriber/Observer.
+    * (__N__)ext: bit to indicate Next (Payload Data and/or Metadata present).
+        * If set, `onNext(Payload)` or equivalent will be invoked on Subscriber/Observer.
 * __Payload Data__: payload for Reactive Streams onNext.
 
 Valid combinations of (C)omplete and (N)ext flags are:
 
 - Both (C)omplete and (N)ext set meaning PAYLOAD contains data and signals stream completion.
-  - For example: An Observable stream receiving `onNext(payload)` followed by `onComplete()`.
+    - For example: An Observable stream receiving `onNext(payload)` followed by `onComplete()`.
 - Just (C)omplete set meaning PAYLOAD contains no data and only signals stream completion.
-  - For example: An Observable stream receiving `onComplete()`.
+    - For example: An Observable stream receiving `onComplete()`.
 - Just (N)ext set meaning PAYLOAD contains data stream is NOT completed.
-  - For example: An Observable stream receiving `onNext(payload)`.
+    - For example: An Observable stream receiving `onNext(payload)`.
 
 A PAYLOAD MUST NOT have both (C)complete and (N)ext empty (false).
 
@@ -572,7 +599,7 @@ For example: An Observable stream receiving data via `onNext(payload)` where pay
 
 A Metadata Push frame can be used to send asynchronous metadata notifications from a Requester or Responder to its peer.
 
-METADATA_PUSH frames MUST always use Stream ID 0 as they pertain to the Connection.
+METADATA_PUSH frame MUST always use Stream ID 0 as they pertain to the Connection.
 
 Metadata tied to a particular stream uses the individual Payload frame Metadata flag.
 
@@ -614,8 +641,8 @@ The general format for an extension frame is given below.
 
 * __Frame Type__: (6 bits) 0x3F
 * __Flags__: (10 bits)
-  * (__I__)gnore: Can the frame be ignored if not understood?
-  * (__M__)etadata: Metadata Present.
+    * (__I__)gnore: Can the frame be ignored if not understood?
+    * (__M__)etadata: Metadata Present.
 * __Extended Type__: (31 bits = max value 2^31-1 = 2,147,483,647) Unsigned 31-bit integer of Extended type information.
   Value MUST be > 0.
 
@@ -625,7 +652,7 @@ The general format for an extension frame is given below.
 
 The general format for a Resume frame is given below.
 
-RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
+RESUME frame MUST always use Stream ID 0 as they pertain to the connection.
 
 ```
      0                   1                   2                   3
@@ -659,7 +686,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 * __Last Received Server Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the last implied position the
   client received from the server.
 * __First Available Client Position__: (63 bits = max value 2^63-1) Unsigned 63-bit long of the earliest position that
-  the client can rewind back to prior to resending frames.
+  the client can rewind back to prior to resending frame.
 
 <a name="frame-resume-ok"></a>
 
@@ -667,7 +694,7 @@ RESUME frames MUST always use Stream ID 0 as they pertain to the connection.
 
 The general format for a Resume OK frame is given below.
 
-RESUME OK frames MUST always use Stream ID 0 as they pertain to the connection.
+RESUME OK frame MUST always use Stream ID 0 as they pertain to the connection.
 
 ```
      0                   1                   2                   3

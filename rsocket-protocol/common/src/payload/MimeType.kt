@@ -1,8 +1,9 @@
-package rsocket.protocol
+package rsocket.protocol.payload
+
+import rsocket.protocol.*
 
 public sealed interface MimeType : CompactType {
-    public companion object :
-        CompactTypeFactory<WithId, WithName, WellKnown>(::WithIdImpl, ::WithNameImpl, enumValues())
+    public companion object : CompactTypeFactory<WithId, WithName, WellKnown>(::WithIdImpl, ::WithNameImpl, enumValues())
 
     public sealed interface WithId : MimeType, CompactType.WithId
     public sealed interface WithName : MimeType, CompactType.WithName

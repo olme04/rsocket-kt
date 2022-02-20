@@ -1,19 +1,21 @@
-package rsocket.protocol
+package rsocket.protocol.extensions
+
+import rsocket.protocol.*
 
 public sealed interface ExtensionType : CompactType {
-    public companion object :
-        CompactTypeFactory<WithId, WithName, WellKnown>(::WithIdImpl, ::WithNameImpl, enumValues())
+    public companion object : CompactTypeFactory<WithId, WithName, WellKnown>(::WithIdImpl, ::WithNameImpl, enumValues())
 
     public sealed interface WithId : ExtensionType, CompactType.WithId
     public sealed interface WithName : ExtensionType, CompactType.WithName
     public enum class WellKnown(
         public override val text: String,
-        public override val identifier: Byte
+        public override val identifier: Byte,
     ) : ExtensionType, CompactType.WellKnown, WithId, WithName {
         Keepalive("keepalive", 0x00),
         Resume("resume", 0x01),
         Lease("lease", 0x02),
-        Broker("broker", 0x03);
+        Broker("broker", 0x03),
+        Prioritization("prioritization", 0x04);
 
         override fun toString(): String = toString("ExtensionType")
     }

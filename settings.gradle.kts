@@ -48,40 +48,37 @@ group(
     "transport",
     "memory",
     "okhttp",
+
     "ktor",
     "ktor-tcp",
     "ktor-websocket",
     "ktor-websocket-client",
     "ktor-websocket-server",
+
     "netty",
     "netty-tcp",
     "netty-quic",
     "netty-websocket",
 )
 
-group(
-    "extensions",
-    "extension",
-    "keepalive",
-    "resume",
-    "lease",
-    "broker",
-)
+//group(
+//    "extensions",
+//    "extension",
+//    "keepalive",
+//    "resume",
+//    "lease",
+//    "broker",
+//    "prioritization",
+//)
 
-modules(
-    "protocol",
-    "metadata",
-    "payload",
-    "frame",
-)
+modules("protocol")
 
 //
-//include(
-//    "rsocket-coroutines",
-//    "rsocket-internal",
+//modules(
+//    "coroutines",
+//    "internal",
 //    "rsocket-annotations", //TODO: is it needed?
 //    "rsocket-configuration",
-//    "rsocket-machinery",
 //    "rsocket-connection",
 //    "rsocket-loadbalance",
 //)

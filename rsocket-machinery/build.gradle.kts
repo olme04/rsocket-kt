@@ -3,10 +3,10 @@ plugins {
 }
 
 library {
-    description("RSocket payload API")
+    description("RSocket IMPL") //TODO
     uses(
-        projects.io,
+        projects.transport,
         projects.protocol,
-        projects.metadata
+        projects.payload,
     )
 }

@@ -8,7 +8,7 @@ import rsocket.protocol.payload.*
 
 public sealed interface ConnectionInitFrame : ConnectionFrame
 
-public sealed interface ClientInitFrame : ConnectionInitFrame, Frame.WithPayload, Frame.WithExtensions {
+public sealed interface ConnectFrame : ConnectionInitFrame, Frame.WithPayload, Frame.WithExtensions {
     public val sessionToken: Buffer?
 }
 
@@ -19,22 +19,22 @@ public class SetupFrame(
     override val sessionToken: Buffer?,
     override val extensions: List<SetupExtension>,
     override val payload: Payload,
-) : ClientInitFrame
+) : ConnectFrame
 
 public class RestoreFrame(
     override val sessionToken: Buffer?,
     override val extensions: List<RestoreExtension>,
     override val payload: Payload,
-) : ClientInitFrame
+) : ConnectFrame
 
-public sealed interface ServerInitFrame : ConnectionInitFrame
+public sealed interface AcceptFrame : ConnectionInitFrame
 
 public class AckFrame(
     override val extensions: List<AckExtension>,
     override val payload: Payload,
-) : ServerInitFrame, Frame.WithPayload, Frame.WithExtensions
+) : AcceptFrame, Frame.WithPayload, Frame.WithExtensions
 
-public class ConnectionInitErrorFrame(
-    override val code: ConnectionInitErrorCode,
+public class AcceptErrorFrame(
+    override val code: AcceptErrorCode,
     override val data: Buffer,
-) : ServerInitFrame, Frame.Error
+) : AcceptFrame, Frame.Error

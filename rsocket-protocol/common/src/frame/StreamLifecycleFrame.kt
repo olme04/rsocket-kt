@@ -32,8 +32,8 @@ public class StreamExtensionFrame(
     override val extensions: List<CustomRequestExtension>,
 ) : StreamLifecycleFrame, Frame.Extension
 
-public class StreamLifecycleErrorFrame(
+public class StreamErrorFrame(
     override val streamId: Int,
-    override val code: RequestErrorCode,
+    override val code: StreamErrorCode,
     override val data: Buffer,
 ) : StreamLifecycleFrame, Frame.Error

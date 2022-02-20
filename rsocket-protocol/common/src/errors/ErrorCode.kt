@@ -7,34 +7,30 @@ public sealed interface ErrorCode {
     public sealed interface Custom : ErrorCode
 }
 
+public sealed interface AcceptErrorCode : ErrorCode {
+    public object UnsupportedSetup : AcceptErrorCode
+    public object InvalidSetup : AcceptErrorCode
+    public object RejectedSetup : AcceptErrorCode
+
+    public object UnsupportedRestore : AcceptErrorCode
+    public object InvalidRestore : AcceptErrorCode
+    public object RejectedRestore : AcceptErrorCode
+
+    public interface Custom : AcceptErrorCode, ErrorCode.Custom
+}
+
 public sealed interface ConnectionErrorCode : ErrorCode {
+    public object ConnectionError : ConnectionErrorCode
+    public object ConnectionClose : ConnectionErrorCode
+
     public interface Custom : ConnectionErrorCode, ErrorCode.Custom
 }
 
-public sealed interface ConnectionLifecycleErrorCode : ConnectionErrorCode {
-    public object ConnectionError : ConnectionLifecycleErrorCode
-    public object ConnectionClose : ConnectionLifecycleErrorCode
+public sealed interface StreamErrorCode : ErrorCode {
+    public object ApplicationError : StreamErrorCode
+    public object Invalid : StreamErrorCode
+    public object Rejected : StreamErrorCode
+    public object Canceled : StreamErrorCode
 
-    public interface Custom : ConnectionLifecycleErrorCode, ConnectionErrorCode.Custom
-}
-
-public sealed interface ConnectionInitErrorCode : ConnectionErrorCode {
-    public object UnsupportedSetup : ConnectionInitErrorCode
-    public object InvalidSetup : ConnectionInitErrorCode
-    public object RejectedSetup : ConnectionInitErrorCode
-
-    public object UnsupportedRestore : ConnectionInitErrorCode
-    public object InvalidRestore : ConnectionInitErrorCode
-    public object RejectedRestore : ConnectionInitErrorCode
-
-    public interface Custom : ConnectionInitErrorCode, ConnectionErrorCode.Custom
-}
-
-public sealed interface RequestErrorCode : ErrorCode {
-    public object ApplicationError : RequestErrorCode
-    public object Invalid : RequestErrorCode
-    public object Rejected : RequestErrorCode
-    public object Canceled : RequestErrorCode
-
-    public interface Custom : RequestErrorCode, ErrorCode.Custom
+    public interface Custom : StreamErrorCode, ErrorCode.Custom
 }

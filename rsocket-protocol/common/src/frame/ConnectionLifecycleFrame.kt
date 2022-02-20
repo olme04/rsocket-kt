@@ -10,7 +10,7 @@ public class ConnectionExtensionFrame(
     override val extensions: List<CustomConnectionExtension>,
 ) : ConnectionLifecycleFrame, Frame.Extension
 
-public class ConnectionLifecycleErrorFrame(
-    override val code: ConnectionLifecycleErrorCode,
+public class ConnectionErrorFrame(
+    override val code: ConnectionErrorCode,
     override val data: Buffer,
 ) : ConnectionLifecycleFrame, Frame.Error

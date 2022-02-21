@@ -24,7 +24,10 @@ public interface Buffer : Closeable {
 }
 
 public sealed interface BufferFactory : Closeable {
-    public fun createBuffer(size: Int): Buffer
+    public fun createBuffer(size: Int): MutableBuffer
+
+    //can create composite buffer, or combine buffers, or other thing
+    public operator fun Buffer.plus(other: Buffer): Buffer
 }
 
 public abstract class AbstractBufferFactory<MB : MutableBuffer, B : Buffer> : BufferFactory {

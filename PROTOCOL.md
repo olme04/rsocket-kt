@@ -107,7 +107,7 @@ Frame Contents
 2 ext: 2 (MT) + 2 (F) | 1 (L) + 2 (MT)
 3 ext: 3 (MT) + 3 (F) | 1 (L) + 3 (MT)
 
-``` //3 flags = M(has metadata), DMO(data mime type override), MMO(metadata mime type override)
+``` //3 flags = M(has metadata), MM(multiple metadata), MMO(metadata mime type override), DMO(data mime type override)
      0                   1                   2                   3
      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -122,6 +122,10 @@ Frame Contents
     |                              Data                            ...
     +---------------------------------------------------------------+
 ```
+
+if(M = true) - metadata exists
+if(MM = true) - multiple metadata with same defautl mime type exists
+if(MMO = true) - multiple metadata with different mime types exists
 
 //default flags: |X|M|MMO|DMO|
 

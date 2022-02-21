@@ -2,9 +2,20 @@ package rsocket.lease
 
 import rsocket.io.*
 
-public interface LeasePayload { //todo right interface
+public interface LeasePayload {
     public val strategy: LeaseStrategy
-    public val buffer: Lazy<Buffer>
+
+    public interface Encoder<T : LeasePayload> {
+        public val strategy: LeaseStrategy
+        public fun BufferFactory.encode(payload: T): Buffer
+    }
+
+    public interface Decoder<T : LeasePayload> {
+        public val strategy: LeaseStrategy
+        public fun BufferFactory.decode(buffer: Buffer): T
+    }
+
+    public interface Codec<T : LeasePayload> : Encoder<T>, Decoder<T>
 }
 
 public class RequestsCountLeasePayload(
@@ -12,7 +23,6 @@ public class RequestsCountLeasePayload(
     public val numberOfRequests: Int,
 ) : LeasePayload {
     override val strategy: LeaseStrategy get() = LeaseStrategy.WellKnown.RequestsCount
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }
 
 public class ConcurrencyLimitLeasePayload(
@@ -20,7 +30,6 @@ public class ConcurrencyLimitLeasePayload(
     public val concurrencyLimit: Int,
 ) : LeasePayload {
     override val strategy: LeaseStrategy get() = LeaseStrategy.WellKnown.ConcurrencyLimit
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }
 
 public class FramesCountLeasePayload(
@@ -28,5 +37,4 @@ public class FramesCountLeasePayload(
     public val numberOfFrames: Int,
 ) : LeasePayload {
     override val strategy: LeaseStrategy get() = LeaseStrategy.WellKnown.FramesCount
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }

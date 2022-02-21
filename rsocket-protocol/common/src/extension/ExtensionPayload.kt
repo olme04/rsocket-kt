@@ -4,7 +4,18 @@ import rsocket.io.*
 
 public interface ExtensionPayload {
     public val type: ExtensionType
-    public val buffer: Lazy<Buffer>
+
+    public interface Encoder<T : ExtensionPayload> {
+        public val type: ExtensionType
+        public fun BufferFactory.encode(payload: T): Buffer
+    }
+
+    public interface Decoder<T : ExtensionPayload> {
+        public val type: ExtensionType
+        public fun BufferFactory.decode(buffer: Buffer): T
+    }
+
+    public interface Codec<T : ExtensionPayload> : Encoder<T>, Decoder<T>
 }
 
 //marker interfaces, to not pass extension payload into place, where it can not be used

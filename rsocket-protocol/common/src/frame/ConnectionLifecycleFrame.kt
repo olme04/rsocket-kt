@@ -1,6 +1,5 @@
 package rsocket.protocol.frame
 
-import rsocket.io.*
 import rsocket.protocol.errors.*
 import rsocket.protocol.extension.*
 
@@ -11,6 +10,5 @@ public class ConnectionExtensionFrame(
 ) : ConnectionLifecycleFrame, Frame.Extension
 
 public class ConnectionErrorFrame(
-    override val code: ConnectionErrorCode,
-    override val data: Lazy<Buffer>,
+    override val payload: ErrorPayload,
 ) : ConnectionLifecycleFrame, Frame.Error

@@ -14,6 +14,7 @@ public sealed interface BrokerKey : CompactType {
         ServiceName("io.rsocket.broker.ServiceName", 0x01),
         RouteId("io.rsocket.broker.RouteId", 0x02),
         InstanceName("io.rsocket.routing.InstanceName", 0x03);
+        //TODO add more
 
         override fun toString(): String = toString("BrokerKey")
     }

@@ -1,6 +1,5 @@
 package rsocket.keepalive
 
-import rsocket.io.*
 import rsocket.protocol.extension.*
 import kotlin.time.*
 
@@ -15,13 +14,13 @@ public class KeepAliveSetup(
     public val keepAliveMaxLifetime: Duration,
 ) : SetupExtensionPayload {
     override val type: ExtensionType get() = ExtensionType.WellKnown.Keepalive
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }
 
-public class KeepAliveData(
+public interface KeepAlivePayload
+
+public class KeepAliveTick(
     public val respond: Boolean,
-    public val data: Lazy<Buffer>,
+    public val payload: KeepAlivePayload,
 ) : ConnectionExtensionPayload {
     override val type: ExtensionType get() = ExtensionType.WellKnown.Keepalive
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }

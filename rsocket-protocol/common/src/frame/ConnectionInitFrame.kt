@@ -35,6 +35,5 @@ public class AckFrame(
 ) : AcceptFrame, Frame.WithPayload, Frame.WithExtensions
 
 public class AcceptErrorFrame(
-    override val code: AcceptErrorCode,
-    override val data: Lazy<Buffer>,
+    override val payload: ErrorPayload,
 ) : AcceptFrame, Frame.Error

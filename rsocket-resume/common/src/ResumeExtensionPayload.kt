@@ -1,6 +1,5 @@
 package rsocket.resume
 
-import rsocket.io.*
 import rsocket.protocol.extension.*
 
 /*
@@ -12,7 +11,6 @@ import rsocket.protocol.extension.*
 //just marker, that resume should be enabled
 public object ResumeEnabled : SetupExtensionPayload {
     override val type: ExtensionType get() = ExtensionType.WellKnown.Resume
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }
 
 public class ResumeStreamsPosition(
@@ -23,13 +21,11 @@ public class ResumeStreamsPosition(
     AckExtensionPayload,
     ConnectionExtensionPayload {
     override val type: ExtensionType get() = ExtensionType.WellKnown.Resume
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }
 
 //just marker, that requester needs resume for this stream
 public object ResumeNeeded : RequestInitExtensionPayload {
     override val type: ExtensionType get() = ExtensionType.WellKnown.Resume
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }
 
 //just marker, that responder allows resuming of this stream
@@ -38,11 +34,10 @@ public object ResumeAllowed : ExtensionPayload,
     RequestNExtensionPayload,
     CancelExtensionPayload {
     override val type: ExtensionType get() = ExtensionType.WellKnown.Resume
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }
 
 //just marker, that requester/responder completed resume operation for stream
+//TODO: rename?
 public object ResumeCompleted : StreamRestoreExtensionPayload {
     override val type: ExtensionType get() = ExtensionType.WellKnown.Resume
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }

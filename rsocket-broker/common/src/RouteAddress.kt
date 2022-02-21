@@ -1,6 +1,5 @@
 package rsocket.broker
 
-import rsocket.io.*
 import rsocket.protocol.extension.*
 
 public enum class RoutingType {
@@ -13,5 +12,4 @@ public class RouteAddress(
     public val tags: Map<BrokerKey, String>,
 ) : RequestInitExtensionPayload {
     override val type: ExtensionType get() = ExtensionType.WellKnown.Broker
-    override val buffer: Lazy<Buffer> = lazy { TODO() }
 }

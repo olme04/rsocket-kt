@@ -65,3 +65,20 @@ module("rsocket-broker")
 //    "rsocket-configuration",
 //    "rsocket-connection",
 //)
+
+
+/* SAGA extension
+
+ */
+
+/* Quorum extension
+
+ */
+
+/* Clock sync extension
+
+ */
+
+/* Security/Auth as extension?
+
+ */

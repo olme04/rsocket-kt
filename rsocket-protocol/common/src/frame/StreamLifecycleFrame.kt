@@ -1,6 +1,5 @@
 package rsocket.protocol.frame
 
-import rsocket.io.*
 import rsocket.protocol.errors.*
 import rsocket.protocol.extension.*
 import rsocket.protocol.payload.*
@@ -34,6 +33,5 @@ public class StreamExtensionFrame(
 
 public class StreamErrorFrame(
     override val streamId: Int,
-    override val code: StreamErrorCode,
-    override val data: Lazy<Buffer>,
+    override val payload: ErrorPayload,
 ) : StreamLifecycleFrame, Frame.Error
